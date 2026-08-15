@@ -1,6 +1,11 @@
 // priority: 0
 
-const $EntityDamageSource = Java.loadClass(`net.minecraft.world.damagesource.EntityDamageSource`);
+// 1.20 removed EntityDamageSource — damage types are data-driven now
+// (see kubejs/data/kubejs/damage_type/coughing.json)
+const $ResourceKey = Java.loadClass(`net.minecraft.resources.ResourceKey`);
+const $ResourceLocation = Java.loadClass(`net.minecraft.resources.ResourceLocation`);
+const $Registries = Java.loadClass(`net.minecraft.core.registries.Registries`);
+const $COUGHING_TYPE = $ResourceKey.create($Registries.DAMAGE_TYPE, new $ResourceLocation('kubejs', 'coughing'));
 
 StartupEvents.registry('mob_effect', event => {
 	event.create('coughing')
@@ -17,8 +22,8 @@ StartupEvents.registry('mob_effect', event => {
 })
 
 global.coughingEffect = (entity, lvl) => {
-	let coughingDamage = new $EntityDamageSource('coughing', entity)
 	if (entity.level.clientSide) return
+	let coughingDamage = entity.level.damageSources().source($COUGHING_TYPE, entity)
 	entity.attack(coughingDamage, lvl + 1)
 }
 
