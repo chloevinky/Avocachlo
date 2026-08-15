@@ -1,0 +1,37 @@
+name: Build Prism instance
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build instance zip
+        run: python3 tools/build-prism-instance.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Avocachlo-Prism-Instance
+          path: build/Avocachlo-Prism.zip
+
+      - name: Update rolling release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: prism-latest
+          name: Prism Launcher instance (latest)
+          body: |
+            Ready-to-import Prism Launcher instance, auto-built from the latest main branch.
+
+            **Install:** Prism Launcher → Add Instance → Import → Local file → select `Avocachlo-Prism.zip`.
+
+            Mods are not included in this repository — after importing, add the pack's 1.20.1 Forge mods to the instance's `mods` folder. See the README for details.
+          files: build/Avocachlo-Prism.zip
